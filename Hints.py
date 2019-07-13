@@ -519,13 +519,18 @@ hint_dist_sets = {
     },
     'tournament': OrderedDict({
         # (number of hints, count per hint)
-        'trial':     (0.0, 2),
-        'always':    (0.0, 2),
-        'woth':      (5.0, 2),
-        'barren':    (3.0, 2),
-        'entrance':  (4.0, 2),
-        'sometimes': (0.0, 2),
-        'random':    (0.0, 2),
+        'trial':    (0.0, 1),
+        'always':   (0.0, 1),
+        'junk':     (7.0, 1),
+        'woth':     (2.0, 1),
+        'barren':   (1.0, 1),
+        'item':     (5.0, 1),
+        'song':     (1.0, 1),
+        'minigame': (2.0, 1),
+        'ow':       (3.0, 1),
+        'dungeon':  (3.0, 1),
+        'entrance': (2.0, 1),
+        'random':   (10.0, 1),
     }),
 }
 
@@ -590,18 +595,18 @@ def buildWorldGossipHints(spoiler, world, checkedLocations=None):
         add_hint(spoiler, world, stoneIDs, GossipText('%s #%s#.' % (location_text, item_text), ['Green', 'Red']), hint_dist['always'][1], location, force_reachable=True)
 
     # Add trial hints
-    if world.trials_random and world.trials == 6:
-        add_hint(spoiler, world, stoneIDs, GossipText("#Ganon's Tower# is protected by a powerful barrier.", ['Pink']), hint_dist['trial'][1], force_reachable=True)
-    elif world.trials_random and world.trials == 0:
-        add_hint(spoiler, world, stoneIDs, GossipText("Sheik dispelled the barrier around #Ganon's Tower#.", ['Yellow']), hint_dist['trial'][1], force_reachable=True)
-    elif world.trials < 6 and world.trials > 3:
-        for trial,skipped in world.skipped_trials.items():
-            if skipped:
-                add_hint(spoiler, world, stoneIDs,GossipText("the #%s Trial# was dispelled by Sheik." % trial, ['Yellow']), hint_dist['trial'][1], force_reachable=True)
-    elif world.trials <= 3 and world.trials > 0:
-        for trial,skipped in world.skipped_trials.items():
-            if not skipped:
-                add_hint(spoiler, world, stoneIDs, GossipText("the #%s Trial# protects Ganon's Tower." % trial, ['Pink']), hint_dist['trial'][1], force_reachable=True)
+    # if world.trials_random and world.trials == 6:
+    #     add_hint(spoiler, world, stoneIDs, GossipText("#Ganon's Tower# is protected by a powerful barrier.", ['Pink']), hint_dist['trial'][1], force_reachable=True)
+    # elif world.trials_random and world.trials == 0:
+    #     add_hint(spoiler, world, stoneIDs, GossipText("Sheik dispelled the barrier around #Ganon's Tower#.", ['Yellow']), hint_dist['trial'][1], force_reachable=True)
+    # elif world.trials < 6 and world.trials > 3:
+    for trial,skipped in world.skipped_trials.items():
+        if skipped:
+            add_hint(spoiler, world, stoneIDs,GossipText("the #%s Trial# was dispelled by Sheik." % trial, ['Yellow']), hint_dist['trial'][1], force_reachable=True)
+    # elif world.trials <= 3 and world.trials > 0:
+    #     for trial,skipped in world.skipped_trials.items():
+        if not skipped:
+            add_hint(spoiler, world, stoneIDs, GossipText("the #%s Trial# protects Ganon's Tower." % trial, ['Pink']), hint_dist['trial'][1], force_reachable=True)
 
     hint_types = list(hint_types)
     hint_prob  = list(hint_prob)
@@ -613,6 +618,8 @@ def buildWorldGossipHints(spoiler, world, checkedLocations=None):
             fixed_hint_types.extend([hint_type] * int(hint_dist[hint_type][0]))
         fill_hint_types = ['sometimes', 'random']
         current_fill_type = fill_hint_types.pop(0)
+
+    addedJokeHint = False
 
     while stoneIDs:
         if world.hint_dist == "tournament":
@@ -639,6 +646,20 @@ def buildWorldGossipHints(spoiler, world, checkedLocations=None):
                 hint_type = random_choices(hint_types, weights=weighted_hint_prob)[0]
             except IndexError:
                 raise Exception('Not enough valid hints to fill gossip stone locations.')
+
+        if not addedJokeHint and hint_type == 'junk':
+            if world.id == 1:
+                add_hint(spoiler, world, stoneIDs, GossipText("They say that dogs are better than cats.", prefix=''), hint_dist['junk'][1], force_reachable=True)
+                addedJokeHint = True
+            elif world.id == 2:
+                add_hint(spoiler, world, stoneIDs, GossipText("They say that Aqua is best girl.", prefix=''), hint_dist['junk'][1], force_reachable=True)
+                addedJokeHint = True
+            elif world.id == 3:
+                add_hint(spoiler, world, stoneIDs, GossipText("They say that twins sometimes wake up thinking they're the other twin.", prefix=''), hint_dist['junk'][1], force_reachable=True)
+                addedJokeHint = True
+            elif world.id == 4:
+                add_hint(spoiler, world, stoneIDs, GossipText("They say that Marth's down smash sucks.", prefix=''), hint_dist['junk'][1], force_reachable=True)
+                addedJokeHint = True
 
         hint = hint_func[hint_type](spoiler, world, checkedLocations)
 
